@@ -37,7 +37,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Build with Gemini"),
+        title: const Text("সখী ভালোবাসা কারে কয়?"),
         centerTitle: true,
       ),
       body: const ChatScreen(),
