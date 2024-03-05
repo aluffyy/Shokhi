@@ -53,7 +53,7 @@ class _HomeState extends State<Home> {
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(
-            "Trust your Shokhi!",
+            "(❁´◡`❁) Shokhi (❁´◡`❁)",
             style: TextStyle(
               color: _isDarkMode ? Colors.white : Colors.black,
             ),
@@ -115,11 +115,6 @@ class _HomeState extends State<Home> {
     );
   }
 }
-
-
-
-
-
 
 
 
@@ -190,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     autofocus: true,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.all(15),
-                      hintText: 'Enter a prompt...',
+                      hintText: 'Ask away anything...',
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(
                           Radius.circular(14),
@@ -235,6 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
   Future<void> _sendChatMessage(String message) async {
     setState(() => _loading = true);
 
@@ -285,7 +281,7 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.send, size: 34 * _scaleAnimation.value);
+    return Icon(Icons.send, size: 24 * _scaleAnimation.value);
   }
 }
 
