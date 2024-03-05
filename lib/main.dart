@@ -33,17 +33,98 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isDarkMode = false;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("সখী ভালোবাসা কারে কয়?"),
-        centerTitle: true,
+    return MaterialApp(
+      theme: _isDarkMode
+          ? ThemeData.dark().copyWith(
+        primaryColor: Colors.deepPurple, // Adjust primary color
+        // Add other theme customizations for dark mode (optional)
+      )
+          : ThemeData.light().copyWith(
+        primaryColor: Colors.teal, // Adjust primary color
+        // Add other theme customizations for light mode (optional)
       ),
-      body: const ChatScreen(),
+      home: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text(
+            "Trust your Shokhi!",
+            style: TextStyle(
+              color: _isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent, // Transparent background
+          elevation: 0.0, // Remove shadow
+          iconTheme: IconThemeData(
+            color: _isDarkMode ? Colors.white : Colors.black,
+          ),
+          leading: IconButton(
+            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+            icon: Icon(
+              Icons.menu,
+              color: _isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+          actions: [
+            Switch(
+              value: _isDarkMode,
+              onChanged: (value) {
+                setState(() {
+                  _isDarkMode = value;
+                });
+              },
+            )
+          ],
+        ),
+        body: Container(
+          color: _isDarkMode ? Colors.black : Colors.white, // Set background color based on theme
+          child: const ChatScreen(), // Replace with your main content
+        ),
+        drawer: Drawer(
+          child: SafeArea(
+            child: Column(
+              children: [
+                const UserAccountsDrawerHeader(
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Colors.grey,
+                    child: Text("S"), // Replace with user image or initials
+                  ),
+                  accountName: Text("Shokhi User"),
+                  accountEmail: Text("shokhiuser@example.com"),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.login),
+                  title: const Text("Login with Google"),
+                  onTap: () async {
+                    // Implement Google Sign-in logic here
+                    // You'll need to install and use the `google_sign_in` package
+                    // Refer to https://pub.dev/packages/google_sign_in for details
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -145,7 +226,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   )
                 else
-                  const CircularProgressIndicator(),
+                  const CustomLoadingAnimation(),
               ],
             ),
           ),
@@ -172,6 +253,41 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 }
+
+
+class CustomLoadingAnimation extends StatefulWidget {
+  const CustomLoadingAnimation({super.key});
+
+  @override
+  State<CustomLoadingAnimation> createState() => _CustomLoadingAnimationState();
+}
+
+class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..repeat();
+    _scaleAnimation = Tween<double>(begin: 1.5, end: 0.5)
+        .animate(_controller)
+      ..addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.send, size: 24 * _scaleAnimation.value);
+  }
+}
+
 
 
 
