@@ -53,14 +53,14 @@ class _HomeState extends State<Home> {
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(
-            "(❁´◡`❁) Shokhi (❁´◡`❁)",
+            "ಠ﹏ಠ Shokhi ಠ﹏ಠ",
             style: TextStyle(
               color: _isDarkMode ? Colors.white : Colors.black,
             ),
           ),
           centerTitle: true,
           backgroundColor: Colors.transparent, // Transparent background
-          elevation: 0.0, // Remove shadow
+          elevation: 20.0, // Remove shadow
           iconTheme: IconThemeData(
             color: _isDarkMode ? Colors.white : Colors.black,
           ),
@@ -117,11 +117,6 @@ class _HomeState extends State<Home> {
 }
 
 
-
-
-
-
-
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -174,8 +169,8 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
-              vertical: 25,
-              horizontal: 15,
+              vertical: 9,
+              horizontal: 9,
             ),
             child: Row(
               children: [
@@ -184,8 +179,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     controller: _textController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(15),
-                      hintText: 'Ask away anything...',
+                      contentPadding: const EdgeInsets.all(11),
+                      hintText: 'Ask shokhi anything...',
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(
                           Radius.circular(14),
@@ -286,8 +281,6 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
 }
 
 
-
-
 class MessageWidget extends StatelessWidget {
   final String text;
   final bool isFromUser;
@@ -303,44 +296,59 @@ class MessageWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        Flexible(
-          child: Stack( // Use Stack to position button on top of content
-            children: [
-              Container(
-                constraints: const BoxConstraints(maxWidth: 600),
-                decoration: BoxDecoration(
-                  color: isFromUser
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 20,
-                ),
-                margin: const EdgeInsets.only(bottom: 8),
-                child: MarkdownBody(
-                  selectable: true,
-                  data: text,
-                ),
-              ),
-              Positioned( // Position button at bottom right corner
-                right: 5,
-                bottom: 5,
-                child: IconButton(
-                  onPressed: () => Clipboard.setData(ClipboardData(text: text)),
-                  icon: const Icon(Icons.content_copy),
-                  iconSize: 18.0,
-                  color: Colors.grey, // Adjust color as needed
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Use the custom TextContainerWithCopy widget
+        TextContainerWithCopy(isFromUser: isFromUser, text: text),
       ],
     );
   }
-
-
-
 }
+
+
+class TextContainerWithCopy extends StatelessWidget {
+  final bool isFromUser;
+  final String text;
+
+  const TextContainerWithCopy({super.key, required this.isFromUser, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min, // Ensures content fits
+      children: [
+        if (isFromUser)
+          IconButton(
+            onPressed: () => Clipboard.setData(ClipboardData(text: text)),
+            icon: const Icon(Icons.content_copy),
+            iconSize: 18.0,
+            color: Colors.grey, // Adjust color as needed
+          ),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 320),
+          decoration: BoxDecoration(
+            color: isFromUser
+                ? Theme.of(context).colorScheme.primaryContainer
+                : Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: 15,
+            horizontal: 20,
+          ),
+          margin: const EdgeInsets.only(bottom: 8),
+          child: MarkdownBody(
+            selectable: true,
+            data: text,
+          ),
+        ),
+        if (!isFromUser)
+          IconButton(
+            onPressed: () => Clipboard.setData(ClipboardData(text: text)),
+            icon: const Icon(Icons.content_copy),
+            iconSize: 18.0,
+            color: Colors.grey, // Adjust color as needed
+          ),
+      ],
+    );
+  }
+}
+
