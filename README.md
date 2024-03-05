@@ -22,7 +22,7 @@
 
 **Getting Started:**
 
-1. Clone the repository: `git clone https://github.com/your-username/shokhi.git`
+1. Clone the repository: `git clone https://github.com/aluffyy/shokhi.git`
 2. Install dependencies: `flutter pub get`
 3. (Optional) Set up your Gemini Pro API key in the `.env` file.
 
