@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -284,7 +285,7 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.send, size: 24 * _scaleAnimation.value);
+    return Icon(Icons.send, size: 34 * _scaleAnimation.value);
   }
 }
 
@@ -307,26 +308,43 @@ class MessageWidget extends StatelessWidget {
       mainAxisAlignment: isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Flexible(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
-            decoration: BoxDecoration(
-              color: isFromUser
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 20,
-            ),
-            margin: const EdgeInsets.only(bottom: 8),
-            child: MarkdownBody(
-              selectable: true,
-              data: text,
-            ),
+          child: Stack( // Use Stack to position button on top of content
+            children: [
+              Container(
+                constraints: const BoxConstraints(maxWidth: 600),
+                decoration: BoxDecoration(
+                  color: isFromUser
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                margin: const EdgeInsets.only(bottom: 8),
+                child: MarkdownBody(
+                  selectable: true,
+                  data: text,
+                ),
+              ),
+              Positioned( // Position button at bottom right corner
+                right: 5,
+                bottom: 5,
+                child: IconButton(
+                  onPressed: () => Clipboard.setData(ClipboardData(text: text)),
+                  icon: const Icon(Icons.content_copy),
+                  iconSize: 18.0,
+                  color: Colors.grey, // Adjust color as needed
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
+
+
+
 }
