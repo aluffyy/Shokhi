@@ -15,7 +15,7 @@ class NavigationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "ಠ﹏ಠ Shokhi ಠ﹏ಠ",
+          "Shokhi",
           style: TextStyle(
             color: isDarkMode ? Colors.white : Colors.black,
           ),
