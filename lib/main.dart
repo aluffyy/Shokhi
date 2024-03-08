@@ -3,10 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
+import 'package:shokhi/provider/theme_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,8 +26,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Shokhi',
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.teal,
@@ -43,49 +57,46 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isDarkMode = false;
-
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode =
+        Theme.of(context).colorScheme.brightness == Brightness.dark;
+
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
           "ಠ﹏ಠ Shokhi ಠ﹏ಠ",
           style: TextStyle(
-            color: _isDarkMode ? Colors.white : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent, // Transparent background
         elevation: 20.0, // Remove shadow
         iconTheme: IconThemeData(
-          color: _isDarkMode ? Colors.white : Colors.black,
+          color: isDarkMode ? Colors.white : Colors.black,
         ),
-        leading: IconButton(
-          onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-          icon: Icon(
-            Icons.menu,
-            color: _isDarkMode ? Colors.white : Colors.black,
+        leading: Builder(
+          builder: (context) => IconButton(
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            icon: Icon(
+              Icons.menu,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
           ),
         ),
         actions: [
-          Switch(
-            value: _isDarkMode,
-            onChanged: (value) {
-              setState(() {
-                _isDarkMode = value;
-              });
+          IconButton(
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme(context);
             },
-          )
+            icon: isDarkMode
+                ? const Icon(Icons.dark_mode_rounded)
+                : const Icon(Icons.light_mode_rounded),
+          ),
+          // A little bit of spacing to the right
+          const SizedBox(width: 10),
         ],
-      ),
-      body: Container(
-        color: _isDarkMode
-            ? Colors.black
-            : Colors.white, // Set background color based on theme
-        child: const ChatScreen(), // Replace with your main content
       ),
       drawer: Drawer(
         child: SafeArea(
@@ -112,6 +123,7 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+      body: const ChatScreen(),
     );
   }
 }
@@ -132,8 +144,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    _model =
-        GenerativeModel(model: "gemini-pro", apiKey: dotenv.env['API_KEY']!);
+    _model = GenerativeModel(
+      model: "gemini-pro",
+      apiKey: dotenv.env['API_KEY']!,
+    );
     _chat = _model.startChat();
     super.initState();
   }
@@ -142,6 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     bool hasApiKey =
         dotenv.env['API_KEY'] != null && dotenv.env['API_KEY']!.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
