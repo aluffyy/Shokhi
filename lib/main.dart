@@ -3,10 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
+import 'package:shokhi/provider/theme_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,10 +26,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Shokhi',
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const Home(),
@@ -34,88 +57,76 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isDarkMode = false;
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: _isDarkMode
-          ? ThemeData.dark().copyWith(
-        primaryColor: Colors.deepPurple, // Adjust primary color
-        // Add other theme customizations for dark mode (optional)
-      )
-          : ThemeData.light().copyWith(
-        primaryColor: Colors.teal, // Adjust primary color
-        // Add other theme customizations for light mode (optional)
-      ),
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(
-            "ಠ﹏ಠ Shokhi ಠ﹏ಠ",
-            style: TextStyle(
-              color: _isDarkMode ? Colors.white : Colors.black,
-            ),
+    bool isDarkMode =
+        Theme.of(context).colorScheme.brightness == Brightness.dark;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "ಠ﹏ಠ Shokhi ಠ﹏ಠ",
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
-          centerTitle: true,
-          backgroundColor: Colors.transparent, // Transparent background
-          elevation: 20.0, // Remove shadow
-          iconTheme: IconThemeData(
-            color: _isDarkMode ? Colors.white : Colors.black,
-          ),
-          leading: IconButton(
-            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent, // Transparent background
+        elevation: 20.0, // Remove shadow
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            onPressed: () => Scaffold.of(context).openDrawer(),
             icon: Icon(
               Icons.menu,
-              color: _isDarkMode ? Colors.white : Colors.black,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
           ),
-          actions: [
-            Switch(
-              value: _isDarkMode,
-              onChanged: (value) {
-                setState(() {
-                  _isDarkMode = value;
-                });
-              },
-            )
-          ],
         ),
-        body: Container(
-          color: _isDarkMode ? Colors.black : Colors.white, // Set background color based on theme
-          child: const ChatScreen(), // Replace with your main content
-        ),
-        drawer: Drawer(
-          child: SafeArea(
-            child: Column(
-              children: [
-                const UserAccountsDrawerHeader(
-                  currentAccountPicture: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    child: Text("S"), // Replace with user image or initials
-                  ),
-                  accountName: Text("Shokhi User"),
-                  accountEmail: Text("shokhiuser@example.com"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme(context);
+            },
+            icon: isDarkMode
+                ? const Icon(Icons.dark_mode_rounded)
+                : const Icon(Icons.light_mode_rounded),
+          ),
+          // A little bit of spacing to the right
+          const SizedBox(width: 10),
+        ],
+      ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const UserAccountsDrawerHeader(
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.grey,
+                  child: Text("S"), // Replace with user image or initials
                 ),
-                ListTile(
-                  leading: const Icon(Icons.login),
-                  title: const Text("Login with Google"),
-                  onTap: () async {
-                    // Implement Google Sign-in logic here
-                    // You'll need to install and use the `google_sign_in` package
-                    // Refer to https://pub.dev/packages/google_sign_in for details
-                  },
-                ),
-              ],
-            ),
+                accountName: Text("Shokhi User"),
+                accountEmail: Text("shokhiuser@example.com"),
+              ),
+              ListTile(
+                leading: const Icon(Icons.login),
+                title: const Text("Login with Google"),
+                onTap: () async {
+                  // Implement Google Sign-in logic here
+                  // You'll need to install and use the `google_sign_in` package
+                  // Refer to https://pub.dev/packages/google_sign_in for details
+                },
+              ),
+            ],
           ),
         ),
       ),
+      body: const ChatScreen(),
     );
   }
 }
-
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -133,15 +144,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    _model = GenerativeModel(model: "gemini-pro", apiKey: dotenv.env['API_KEY']!);
+    _model = GenerativeModel(
+      model: "gemini-pro",
+      apiKey: dotenv.env['API_KEY']!,
+    );
     _chat = _model.startChat();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool hasApiKey = dotenv.env['API_KEY'] != null && dotenv.env['API_KEY']!.isNotEmpty;
-    return  Padding(
+    bool hasApiKey =
+        dotenv.env['API_KEY'] != null && dotenv.env['API_KEY']!.isNotEmpty;
+
+    return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -150,22 +166,25 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: hasApiKey
                 ? ListView.builder(
-              controller: _scrollController,
-              itemBuilder: (context, idx) {
-                final content = _chat.history.toList()[idx];
-                final text = content.parts.whereType<TextPart>().map<String>((e) => e.text).join('');
-                return MessageWidget(
-                  text: text,
-                  isFromUser: content.role == 'user',
-                );
-              },
-              itemCount: _chat.history.length,
-            )
+                    controller: _scrollController,
+                    itemBuilder: (context, idx) {
+                      final content = _chat.history.toList()[idx];
+                      final text = content.parts
+                          .whereType<TextPart>()
+                          .map<String>((e) => e.text)
+                          .join('');
+                      return MessageWidget(
+                        text: text,
+                        isFromUser: content.role == 'user',
+                      );
+                    },
+                    itemCount: _chat.history.length,
+                  )
                 : ListView(
-              children: const [
-                Text('No API key found. Please provide an API Key.'),
-              ],
-            ),
+                    children: const [
+                      Text('No API key found. Please provide an API Key.'),
+                    ],
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -246,7 +265,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-
 class CustomLoadingAnimation extends StatefulWidget {
   const CustomLoadingAnimation({super.key});
 
@@ -262,9 +280,10 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..repeat();
-    _scaleAnimation = Tween<double>(begin: 1.5, end: 0.5)
-        .animate(_controller)
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500))
+      ..repeat();
+    _scaleAnimation = Tween<double>(begin: 1.5, end: 0.5).animate(_controller)
       ..addListener(() => setState(() {}));
   }
 
@@ -280,7 +299,6 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
   }
 }
 
-
 class MessageWidget extends StatelessWidget {
   final String text;
   final bool isFromUser;
@@ -294,7 +312,8 @@ class MessageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment:
+          isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         // Use the custom TextContainerWithCopy widget
         TextContainerWithCopy(isFromUser: isFromUser, text: text),
@@ -303,12 +322,12 @@ class MessageWidget extends StatelessWidget {
   }
 }
 
-
 class TextContainerWithCopy extends StatelessWidget {
   final bool isFromUser;
   final String text;
 
-  const TextContainerWithCopy({super.key, required this.isFromUser, required this.text});
+  const TextContainerWithCopy(
+      {super.key, required this.isFromUser, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -351,4 +370,3 @@ class TextContainerWithCopy extends StatelessWidget {
     );
   }
 }
-
