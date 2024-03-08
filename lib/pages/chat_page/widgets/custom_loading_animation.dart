@@ -32,6 +32,10 @@ class _CustomLoadingAnimationState extends State<CustomLoadingAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.send, size: 24 * _scaleAnimation.value);
+    return Icon(
+      Icons.send,
+      size: 24 * _scaleAnimation.value,
+      color: Theme.of(context).colorScheme.primary,
+    );
   }
 }

@@ -61,6 +61,7 @@ class _ChatPageState extends State<ChatPage> {
                           .whereType<TextPart>()
                           .map<String>((e) => e.text)
                           .join('');
+
                       return MessageWidget(
                         text: text,
                         isFromUser: content.role == 'user',
@@ -75,10 +76,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 9,
-              horizontal: 9,
-            ),
+            padding: const EdgeInsets.all(9),
             child: Row(
               children: [
                 Expanded(
@@ -86,7 +84,6 @@ class _ChatPageState extends State<ChatPage> {
                     controller: textController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(11),
                       hintText: 'Ask shokhi anything...',
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(
@@ -119,11 +116,12 @@ class _ChatPageState extends State<ChatPage> {
                         onPressed: () async {
                           _sendChatMessage(textController.text);
                         },
+                        padding: const EdgeInsets.all(16),
                         icon: Icon(
                           Icons.send,
                           color: Theme.of(context).colorScheme.primary,
                         ),
-                      )
+                      ),
               ],
             ),
           ),
